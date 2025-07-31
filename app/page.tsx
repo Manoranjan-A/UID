@@ -35,7 +35,6 @@ import {
   Home,
   Info,
   Briefcase,
-  Calendar,
   MessageSquare,
   HelpCircle,
   User,
@@ -60,7 +59,7 @@ export default function IndiaPostHomepage() {
     >
       {/* Top Bar */}
       <div className="bg-gradient-to-r from-red-800 via-red-700 to-red-600 text-white py-3 shadow-lg">
-        <div className="container mx-auto px-4 flex flex-wrap items-center justify-between text-sm">
+        <div className="w-full px-6 flex flex-wrap items-center justify-between text-sm">
           <div className="flex items-center space-x-6">
             <Button
               variant="ghost"
@@ -82,7 +81,7 @@ export default function IndiaPostHomepage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="english">English</SelectItem>
-                <SelectItem value="hindi">हिंदी</SelectItem>
+                <SelectItem value="hindi">Hindi</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -138,56 +137,90 @@ export default function IndiaPostHomepage() {
 
       {/* Header */}
       <header className="bg-white shadow-xl sticky top-0 z-50 border-b-4 border-gradient-to-r from-red-500 to-yellow-400">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between py-6">
-            <div className="flex items-center space-x-4">
+        <div className="w-full px-6">
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center space-x-4 min-w-0 flex-shrink-0">
               <Image
                 src="/india-post-logo.png"
                 alt="India Post Logo"
-                width={70}
-                height={70}
-                className="drop-shadow-sm"
+                width={50}
+                height={50}
+                className="drop-shadow-sm flex-shrink-0"
               />
-              <div>
-                <h1 className="text-2xl font-bold text-red-700">India Post</h1>
-                <p className="text-base text-red-600 font-medium">भारतीय डाक</p>
-                <p className="text-sm text-gray-600">Department of Posts</p>
-                <p className="text-xs text-gray-500">Ministry of Communications, Government of India</p>
+              <div className="min-w-0">
+                <h1 className="text-xl font-bold text-red-700 whitespace-nowrap">India Post</h1>
+                <p className="text-xs text-gray-600 whitespace-nowrap">Department of Posts</p>
+                <p className="text-xs text-gray-500 whitespace-nowrap">
+                  Ministry of Communications, Government of India
+                </p>
               </div>
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-1">
+            <nav className="hidden lg:flex items-center space-x-2 flex-shrink-0">
               {[
                 { icon: Home, label: "Home", color: "text-red-600" },
-                { icon: Info, label: "About Us", color: "text-blue-600" },
-                { icon: FileText, label: "Forms", color: "text-green-600" },
-                { icon: Briefcase, label: "Recruitment", color: "text-purple-600" },
-                { icon: Calendar, label: "Holidays", color: "text-orange-600" },
-                { icon: MessageSquare, label: "Feedback", color: "text-pink-600" },
-                { icon: FileSearch, label: "RTI", color: "text-indigo-600" },
-                { icon: FileText, label: "Tenders", color: "text-teal-600" },
-                { icon: Contact, label: "Contact Us", color: "text-red-600" },
-                { icon: Globe, label: "Sitemap", color: "text-gray-600" },
-                { icon: HelpCircle, label: "Help", color: "text-blue-600" },
-                { icon: User, label: "Employee Corner", color: "text-green-600" },
+                { icon: Package, label: "Track", color: "text-blue-600" },
+                { icon: Calculator, label: "Postage", color: "text-green-600" },
+                { icon: MapPin, label: "Locate", color: "text-purple-600" },
+                { icon: Briefcase, label: "Recruitment", color: "text-orange-600" },
+                { icon: Contact, label: "Contact", color: "text-red-600" },
               ].map((item, index) => (
                 <Button
                   key={index}
                   variant="ghost"
-                  className="flex items-center space-x-2 text-sm hover:bg-red-50 hover:text-red-700 transition-all duration-200 px-3 py-2 rounded-lg"
+                  className="flex items-center space-x-1 text-sm hover:bg-red-50 hover:text-red-700 transition-all duration-200 px-2 py-2 rounded-lg"
                 >
                   <item.icon className={`h-4 w-4 ${item.color}`} />
                   <span className="font-medium">{item.label}</span>
                 </Button>
               ))}
+
+              {/* More Menu */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  className="flex items-center space-x-1 text-sm hover:bg-red-50 hover:text-red-700 transition-all duration-200 px-2 py-2 rounded-lg"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                  <Menu className="h-4 w-4 text-gray-600" />
+                  <span className="font-medium">More</span>
+                </Button>
+
+                {/* Desktop Dropdown Menu */}
+                {mobileMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                    <div className="py-2">
+                      {[
+                        { icon: Info, label: "About Us", color: "text-blue-600" },
+                        { icon: FileText, label: "Forms", color: "text-green-600" },
+                        { icon: MessageSquare, label: "Feedback", color: "text-pink-600" },
+                        { icon: FileSearch, label: "RTI", color: "text-indigo-600" },
+                        { icon: FileText, label: "Tenders", color: "text-teal-600" },
+                        { icon: Globe, label: "Sitemap", color: "text-gray-600" },
+                        { icon: HelpCircle, label: "Help", color: "text-blue-600" },
+                        { icon: User, label: "Employee Corner", color: "text-green-600" },
+                      ].map((item, index) => (
+                        <Button
+                          key={index}
+                          variant="ghost"
+                          className="w-full justify-start text-sm hover:bg-red-50 hover:text-red-700 transition-all duration-200 px-4 py-2 rounded-none"
+                        >
+                          <item.icon className={`h-4 w-4 mr-3 ${item.color}`} />
+                          <span>{item.label}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </nav>
 
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
               size="sm"
-              className="lg:hidden hover:bg-red-50"
+              className="lg:hidden hover:bg-red-50 flex-shrink-0"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="h-6 w-6 text-red-600" /> : <Menu className="h-6 w-6 text-red-600" />}
@@ -200,10 +233,12 @@ export default function IndiaPostHomepage() {
               <div className="grid grid-cols-2 gap-3 mt-6">
                 {[
                   "Home",
+                  "Track",
+                  "Postage",
+                  "Locate",
                   "About Us",
                   "Forms",
                   "Recruitment",
-                  "Holidays",
                   "Feedback",
                   "RTI",
                   "Tenders",
@@ -228,10 +263,9 @@ export default function IndiaPostHomepage() {
 
       {/* Hero Banner */}
       <section className="bg-gradient-to-r from-red-700 to-red-600 text-white py-16">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6">
           <div className="text-center max-w-4xl mx-auto">
             <h2 className="text-4xl font-bold mb-4">India Post</h2>
-            <p className="text-xl mb-4 text-red-100">भारतीय डाक</p>
             <p className="text-lg mb-8 text-red-100 max-w-3xl mx-auto leading-relaxed">
               Department of Posts, Ministry of Communications, Government of India
             </p>
@@ -258,7 +292,7 @@ export default function IndiaPostHomepage() {
 
       {/* Service Tools - Main Section */}
       <section className="py-16 bg-gradient-to-b from-white to-orange-50">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-800 mb-4">Digital Services</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -625,7 +659,7 @@ export default function IndiaPostHomepage() {
 
       {/* Quick Links / Highlighted Services */}
       <section className="py-16 bg-gradient-to-b from-white to-orange-50">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-800 mb-4">Services</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -716,7 +750,7 @@ export default function IndiaPostHomepage() {
 
       {/* News & Announcements */}
       <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-800 mb-4">News & Announcements</h2>
             <p className="text-xl text-gray-600">
@@ -852,7 +886,7 @@ export default function IndiaPostHomepage() {
 
       {/* Vision & Mission */}
       <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-800 mb-4">Vision, Mission & Values</h2>
             <p className="text-xl text-gray-600">Guided by our vision, mission, and core values since 1854</p>
@@ -940,7 +974,7 @@ export default function IndiaPostHomepage() {
 
       {/* Franchise Scheme Summary */}
       <section className="py-16 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-4xl font-bold text-gray-800 mb-4">Franchise Scheme</h2>
@@ -1042,7 +1076,7 @@ export default function IndiaPostHomepage() {
 
       {/* Forms Section */}
       <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-gray-800 mb-4">Forms & Documents</h2>
             <p className="text-xl text-gray-600">Download official forms and documents for various postal services</p>
@@ -1139,14 +1173,14 @@ export default function IndiaPostHomepage() {
 
       {/* Footer */}
       <footer className="bg-gradient-to-br from-gray-900 via-red-900 to-gray-900 text-white py-16">
-        <div className="container mx-auto px-4">
+        <div className="w-full px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-3 mb-6">
                 <Image src="/india-post-logo.png" alt="India Post Logo" width={50} height={50} />
                 <div>
                   <h3 className="text-lg font-bold text-white">India Post</h3>
-                  <p className="text-gray-300 text-sm">भारतीय डाक</p>
+                  <p className="text-gray-300 text-sm">Department of Posts</p>
                 </div>
               </div>
               <div className="space-y-4">
