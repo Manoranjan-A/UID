@@ -408,8 +408,40 @@ export default function IndiaPostHomepage() {
     )
   }
 
-  // Home page with Digital Services tabs
+  // Home page with Digital Services tabs (responsive)
   const Home = () => {
+    // Responsive scroll controls for tabs
+    const tabsRef = useRef<HTMLDivElement | null>(null)
+    const [canLeft, setCanLeft] = useState(false)
+    const [canRight, setCanRight] = useState(false)
+
+    const updateScrollButtons = () => {
+      const el = tabsRef.current
+      if (!el) return
+      const { scrollLeft, scrollWidth, clientWidth } = el
+      setCanLeft(scrollLeft > 4)
+      setCanRight(scrollLeft + clientWidth < scrollWidth - 4)
+    }
+
+    useEffect(() => {
+      const el = tabsRef.current
+      updateScrollButtons()
+      const onScroll = () => updateScrollButtons()
+      el?.addEventListener("scroll", onScroll, { passive: true })
+      window.addEventListener("resize", onScroll)
+      return () => {
+        el?.removeEventListener("scroll", onScroll)
+        window.removeEventListener("resize", onScroll)
+      }
+    }, [])
+
+    const scrollByAmount = (dir: "left" | "right") => {
+      const el = tabsRef.current
+      if (!el) return
+      const amount = Math.round(el.clientWidth * 0.8)
+      el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" })
+    }
+
     // Track Consignment (tab)
     const [trackNum, setTrackNum] = useState("")
     const [trackCaptcha, setTrackCaptcha] = useState("")
@@ -518,345 +550,415 @@ export default function IndiaPostHomepage() {
               </p>
             </div>
 
-            <Tabs defaultValue="track" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 mb-8 p-2 rounded-xl gap-2 bg-white/70 backdrop-blur-sm ring-1 ring-red-100">
-                <TabsTrigger
+            {/* Wrapper for scroll buttons and edge fades on mobile */}
+            <div className="relative">
+              {/* Edge fades (mobile only) */}
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-orange-50 to-transparent lg:hidden" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-orange-50 to-transparent lg:hidden" />
+
+              {/* Scroll buttons (mobile only) */}
+              <div className="absolute inset-y-0 left-1 flex items-center lg:hidden">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Scroll tabs left"
+                  disabled={!canLeft}
+                  onClick={() => scrollByAmount("left")}
+                  className={`h-8 w-8 rounded-full bg-white/80 shadow ${!canLeft ? "opacity-40" : ""}`}
+                >
+                  <ChevronLeft className="h-4 w-4 text-gray-700" />
+                </Button>
+              </div>
+              <div className="absolute inset-y-0 right-1 flex items-center lg:hidden">
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  aria-label="Scroll tabs right"
+                  disabled={!canRight}
+                  onClick={() => scrollByAmount("right")}
+                  className={`h-8 w-8 rounded-full bg-white/80 shadow ${!canRight ? "opacity-40" : ""}`}
+                >
+                  <ChevronRight className="h-4 w-4 text-gray-700" />
+                </Button>
+              </div>
+
+              <Tabs defaultValue="track" className="w-full">
+                <TabsList
+                  ref={tabsRef as any}
+                  className="
+                    w-full
+                    flex md:grid md:grid-cols-3 lg:grid-cols-5
+                    gap-2 p-2 rounded-xl bg-white/70 backdrop-blur-sm ring-1 ring-red-100
+                    overflow-x-auto md:overflow-visible
+                    scroll-smooth snap-x snap-mandatory
+                    -mx-2 px-4 md:mx-0 md:px-2
+                  "
+                  style={{ scrollbarWidth: "none" as any }}
+                  aria-label="Digital services"
+                >
+                  <TabsTrigger
+                    value="track"
+                    className="
+                      font-semibold flex items-center justify-center gap-2 rounded-lg
+                      bg-red-100 text-red-700 data-[state=active]:bg-red-600 data-[state=active]:text-white
+                      flex-none min-w-[220px] sm:min-w-[240px] lg:min-w-0 snap-start
+                      min-h-[44px] px-3
+                    "
+                  >
+                    <Package className="h-4 w-4" />
+                    <span>Track Consignment</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="postage"
+                    className="
+                      font-semibold flex items-center justify-center gap-2 rounded-lg
+                      bg-amber-50 text-amber-800 data-[state=active]:bg-amber-500 data-[state=active]:text-white
+                      flex-none min-w-[220px] sm:min-w-[240px] lg:min-w-0 snap-start
+                      min-h-[44px] px-3
+                    "
+                  >
+                    <Calculator className="h-4 w-4" />
+                    <span>Calculate Postage</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="locate"
+                    className="
+                      font-semibold flex items-center justify-center gap-2 rounded-lg
+                      bg-yellow-50 text-yellow-800 data-[state=active]:bg-yellow-500 data-[state=active]:text-white
+                      flex-none min-w-[220px] sm:min-w-[240px] lg:min-w-0 snap-start
+                      min-h-[44px] px-3
+                    "
+                  >
+                    <MapPin className="h-4 w-4" />
+                    <span>Locate Post Office</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="pincode"
+                    className="
+                      font-semibold flex items-center justify-center gap-2 rounded-lg
+                      bg-orange-50 text-orange-800 data-[state=active]:bg-orange-500 data-[state=active]:text-white
+                      flex-none min-w-[220px] sm:min-w-[240px] lg:min-w-0 snap-start
+                      min-h-[44px] px-3
+                    "
+                  >
+                    <Search className="h-4 w-4" />
+                    <span>Find Pincode</span>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="register"
+                    className="
+                      font-semibold flex items-center justify-center gap-2 rounded-lg
+                      bg-green-50 text-green-800 data-[state=active]:bg-green-600 data-[state=active]:text-white
+                      flex-none min-w-[220px] sm:min-w-[240px] lg:min-w-0 snap-start
+                      min-h-[44px] px-3
+                    "
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    <span>Customer Registration</span>
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Tab 1: Track Consignment */}
+                <TabsContent
                   value="track"
-                  className="font-semibold flex items-center justify-center gap-2 rounded-lg
-                  bg-red-100 text-red-700 data-[state=active]:bg-red-600 data-[state=active]:text-white"
+                  className="data-[state=inactive]:opacity-0 data-[state=active]:opacity-100 transition-opacity duration-300"
                 >
-                  <Package className="h-4 w-4" />
-                  Track Consignment
-                </TabsTrigger>
-                <TabsTrigger
-                  value="postage"
-                  className="font-semibold flex items-center justify-center gap-2 rounded-lg
-                  bg-amber-50 text-amber-800 data-[state=active]:bg-amber-500 data-[state=active]:text-white"
-                >
-                  <Calculator className="h-4 w-4" />
-                  Calculate Postage
-                </TabsTrigger>
-                <TabsTrigger
-                  value="locate"
-                  className="font-semibold flex items-center justify-center gap-2 rounded-lg
-                  bg-yellow-50 text-yellow-800 data-[state=active]:bg-yellow-500 data-[state=active]:text-white"
-                >
-                  <MapPin className="h-4 w-4" />
-                  Locate Post Office
-                </TabsTrigger>
-                <TabsTrigger
-                  value="pincode"
-                  className="font-semibold flex items-center justify-center gap-2 rounded-lg
-                  bg-orange-50 text-orange-800 data-[state=active]:bg-orange-500 data-[state=active]:text-white"
-                >
-                  <Search className="h-4 w-4" />
-                  Find Pincode
-                </TabsTrigger>
-                <TabsTrigger
-                  value="register"
-                  className="font-semibold flex items-center justify-center gap-2 rounded-lg
-                  bg-green-50 text-green-800 data-[state=active]:bg-green-600 data-[state=active]:text-white"
-                >
-                  <UserPlus className="h-4 w-4" />
-                  Customer Registration
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Tab 1: Track Consignment */}
-              <TabsContent value="track">
-                <Card className="shadow-xl border-0 bg-white overflow-hidden">
-                  <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-6">
-                    <div className="flex items-center gap-3">
-                      <Package className="h-6 w-6" />
-                      <div>
-                        <h3 className="text-2xl font-bold">Track Your Consignment</h3>
-                        <p className="text-red-100">
-                          Enter your consignment number to track your shipment in real-time
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="space-y-6 p-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Consignment Number</label>
-                        <Input
-                          placeholder="EE123456789IN"
-                          value={trackNum}
-                          onChange={(e) => setTrackNum(e.target.value.toUpperCase())}
-                          className="h-12 text-base border-2 border-red-200 focus:border-red-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Captcha Verification</label>
-                        <Input
-                          placeholder="Enter Captcha"
-                          value={trackCaptcha}
-                          onChange={(e) => setTrackCaptcha(e.target.value)}
-                          className="h-12 text-base border-2 border-red-200 focus:border-red-500"
-                        />
-                      </div>
-                    </div>
-                    <Button
-                      onClick={submitTrack}
-                      className="w-full h-12 text-lg bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
-                    >
-                      <Package className="h-5 w-5 mr-2" />
-                      Track Now
-                    </Button>
-                    {trackResult && (
-                      <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 p-3 rounded">
-                        <CheckCircle className="h-5 w-5" />
-                        <span>{trackResult}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Tab 2: Calculate Postage */}
-              <TabsContent value="postage">
-                <Card className="shadow-xl border-0 bg-white overflow-hidden">
-                  <div className="bg-amber-200 text-amber-900 p-6">
-                    <div className="flex items-center gap-3">
-                      <Calculator className="h-6 w-6" />
-                      <div>
-                        <h3 className="text-2xl font-bold">Calculate Postage</h3>
-                        <p className="opacity-80">Calculate postal rates instantly</p>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="space-y-6 p-6">
-                    <div className="grid md:grid-cols-3 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Weight (grams)</label>
-                        <Input
-                          type="number"
-                          placeholder="Weight in grams"
-                          value={postWeight}
-                          onChange={(e) => setPostWeight(e.target.value)}
-                          className="h-12 border-2 border-amber-200 focus:border-amber-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Service Type</label>
-                        <Select onValueChange={setPostService} value={postService}>
-                          <SelectTrigger className="h-12 border-2 border-amber-200 focus:border-amber-500">
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ordinary">Ordinary</SelectItem>
-                            <SelectItem value="registered">Registered</SelectItem>
-                            <SelectItem value="speed">Speed Post</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Destination</label>
-                        <Select onValueChange={setPostDest} value={postDest}>
-                          <SelectTrigger className="h-12 border-2 border-amber-200 focus:border-amber-500">
-                            <SelectValue placeholder="State/City" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Delhi">Delhi</SelectItem>
-                            <SelectItem value="Maharashtra">Maharashtra</SelectItem>
-                            <SelectItem value="West Bengal">West Bengal</SelectItem>
-                            <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={submitPostage}
-                      className="w-full h-12 text-lg bg-amber-500 hover:bg-amber-600 text-white"
-                    >
-                      <Calculator className="h-5 w-5 mr-2" />
-                      Calculate
-                    </Button>
-                    {postResult && (
-                      <div className="flex items-center gap-2 text-blue-800 bg-blue-50 border border-blue-200 p-3 rounded">
-                        <CheckCircle className="h-5 w-5" />
-                        <span>{postResult}</span>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Tab 3: Locate Post Office */}
-              <TabsContent value="locate">
-                <Card className="shadow-xl border-0 bg-white overflow-hidden">
-                  <div className="bg-yellow-300 text-yellow-900 p-6">
-                    <div className="flex items-center gap-3">
-                      <MapPin className="h-6 w-6" />
-                      <div>
-                        <h3 className="text-2xl font-bold">Locate Post Office</h3>
-                        <p className="opacity-80">Find nearest postal office by location or PIN code</p>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="space-y-6 p-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        placeholder="City/State/Area/PIN Code"
-                        value={locQuery}
-                        onChange={(e) => setLocQuery(e.target.value)}
-                        className="pl-9 h-12 border-2 border-yellow-200 focus:border-yellow-500"
-                      />
-                    </div>
-                    <Button className="w-full h-12 text-lg bg-yellow-500 hover:bg-yellow-600 text-white">
-                      <MapPin className="h-5 w-5 mr-2" />
-                      Find Location
-                    </Button>
-                    <div className="space-y-3">
-                      {locResults.map((o, i) => (
-                        <div key={i} className="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded-r">
-                          <div className="flex items-center justify-between">
-                            <div className="font-semibold text-gray-800">{o.name}</div>
-                            <Badge className="bg-yellow-100 text-yellow-800">{o.pin}</Badge>
-                          </div>
-                          <div className="text-gray-700">{o.address}</div>
-                          <div className="text-gray-700">Phone: {o.phone}</div>
+                  <Card className="shadow-xl border-0 bg-white overflow-hidden">
+                    <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-6">
+                      <div className="flex items-center gap-3">
+                        <Package className="h-6 w-6" />
+                        <div>
+                          <h3 className="text-2xl font-bold">Track Your Consignment</h3>
+                          <p className="text-red-100">
+                            Enter your consignment number to track your shipment in real-time
+                          </p>
                         </div>
-                      ))}
-                      {locQuery && locResults.length === 0 && (
-                        <div className="flex items-center gap-2 text-yellow-800 bg-yellow-50 border border-yellow-200 p-3 rounded">
-                          <AlertCircle className="h-5 w-5" />
-                          <span>No results. Try a different query.</span>
+                      </div>
+                    </div>
+                    <CardContent className="space-y-6 p-6">
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Consignment Number</label>
+                          <Input
+                            placeholder="EE123456789IN"
+                            value={trackNum}
+                            onChange={(e) => setTrackNum(e.target.value.toUpperCase())}
+                            className="h-12 text-base border-2 border-red-200 focus:border-red-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Captcha Verification</label>
+                          <Input
+                            placeholder="Enter Captcha"
+                            value={trackCaptcha}
+                            onChange={(e) => setTrackCaptcha(e.target.value)}
+                            className="h-12 text-base border-2 border-red-200 focus:border-red-500"
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        onClick={submitTrack}
+                        className="w-full h-12 text-lg bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                      >
+                        <Package className="h-5 w-5 mr-2" />
+                        Track Now
+                      </Button>
+                      {trackResult && (
+                        <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 p-3 rounded">
+                          <CheckCircle className="h-5 w-5" />
+                          <span>{trackResult}</span>
                         </div>
                       )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
-              {/* Tab 4: Find Pincode */}
-              <TabsContent value="pincode">
-                <Card className="shadow-xl border-0 bg-white overflow-hidden">
-                  <div className="bg-orange-500 text-white p-6">
-                    <div className="flex items-center gap-3">
-                      <Search className="h-6 w-6" />
-                      <div>
-                        <h3 className="text-2xl font-bold">Find Pincode</h3>
-                        <p className="text-white/90">Search PIN codes by city or area name</p>
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="space-y-6 p-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        placeholder="Enter City/Area name"
-                        value={pinQuery}
-                        onChange={(e) => setPinQuery(e.target.value)}
-                        className="pl-9 h-12 border-2 border-orange-200 focus:border-orange-500"
-                      />
-                    </div>
-                    <Button className="w-full h-12 text-lg bg-orange-500 hover:bg-orange-600 text-white">
-                      <Search className="h-5 w-5 mr-2" />
-                      Search
-                    </Button>
-                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
-                      {pinResults.map((p) => (
-                        <div
-                          key={p}
-                          className="flex items-center justify-between bg-orange-50 border border-orange-200 p-3 rounded"
-                        >
-                          <span className="font-medium text-orange-800">{p}</span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="border-orange-300 text-orange-700 bg-transparent"
-                            onClick={() => copyPin(p)}
-                          >
-                            Copy
-                          </Button>
+                {/* Tab 2: Calculate Postage */}
+                <TabsContent value="postage">
+                  <Card className="shadow-xl border-0 bg-white overflow-hidden">
+                    <div className="bg-amber-200 text-amber-900 p-6">
+                      <div className="flex items-center gap-3">
+                        <Calculator className="h-6 w-6" />
+                        <div>
+                          <h3 className="text-2xl font-bold">Calculate Postage</h3>
+                          <p className="opacity-80">Calculate postal rates instantly</p>
                         </div>
-                      ))}
-                    </div>
-                    {pinQuery && pinResults.length === 0 && (
-                      <div className="flex items-center gap-2 text-orange-800 bg-orange-50 border border-orange-200 p-3 rounded">
-                        <AlertCircle className="h-5 w-5" />
-                        <span>No PIN codes found. Try another area.</span>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                    </div>
+                    <CardContent className="space-y-6 p-6">
+                      <div className="grid md:grid-cols-3 gap-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Weight (grams)</label>
+                          <Input
+                            type="number"
+                            placeholder="Weight in grams"
+                            value={postWeight}
+                            onChange={(e) => setPostWeight(e.target.value)}
+                            className="h-12 border-2 border-amber-200 focus:border-amber-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Service Type</label>
+                          <Select onValueChange={setPostService} value={postService}>
+                            <SelectTrigger className="h-12 border-2 border-amber-200 focus:border-amber-500">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ordinary">Ordinary</SelectItem>
+                              <SelectItem value="registered">Registered</SelectItem>
+                              <SelectItem value="speed">Speed Post</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Destination</label>
+                          <Select onValueChange={setPostDest} value={postDest}>
+                            <SelectTrigger className="h-12 border-2 border-amber-200 focus:border-amber-500">
+                              <SelectValue placeholder="State/City" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Delhi">Delhi</SelectItem>
+                              <SelectItem value="Maharashtra">Maharashtra</SelectItem>
+                              <SelectItem value="West Bengal">West Bengal</SelectItem>
+                              <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={submitPostage}
+                        className="w-full h-12 text-lg bg-amber-500 hover:bg-amber-600 text-white"
+                      >
+                        <Calculator className="h-5 w-5 mr-2" />
+                        Calculate
+                      </Button>
+                      {postResult && (
+                        <div className="flex items-center gap-2 text-blue-800 bg-blue-50 border border-blue-200 p-3 rounded">
+                          <CheckCircle className="h-5 w-5" />
+                          <span>{postResult}</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
 
-              {/* Tab 5: Customer Registration */}
-              <TabsContent value="register">
-                <Card className="shadow-xl border-0 bg-white overflow-hidden">
-                  <div className="bg-green-600 text-white p-6">
-                    <div className="flex items-center gap-3">
-                      <UserPlus className="h-6 w-6" />
-                      <div>
-                        <h3 className="text-2xl font-bold">Customer Registration</h3>
-                        <p className="text-green-100">Register as a customer for faster service</p>
+                {/* Tab 3: Locate Post Office */}
+                <TabsContent value="locate">
+                  <Card className="shadow-xl border-0 bg-white overflow-hidden">
+                    <div className="bg-yellow-300 text-yellow-900 p-6">
+                      <div className="flex items-center gap-3">
+                        <MapPin className="h-6 w-6" />
+                        <div>
+                          <h3 className="text-2xl font-bold">Locate Post Office</h3>
+                          <p className="opacity-80">Find nearest postal office by location or PIN code</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <CardContent className="space-y-6 p-6">
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <Input
-                        placeholder="Full Name"
-                        value={regName}
-                        onChange={(e) => setRegName(e.target.value)}
-                        className="h-12 border-2 border-green-200 focus:border-green-500"
-                      />
-                      <Input
-                        type="email"
-                        placeholder="Email"
-                        value={regEmail}
-                        onChange={(e) => setRegEmail(e.target.value)}
-                        className="h-12 border-2 border-green-200 focus:border-green-500"
-                      />
-                      <Input
-                        placeholder="Mobile Number"
-                        value={regMobile}
-                        onChange={(e) => setRegMobile(e.target.value)}
-                        className="h-12 border-2 border-green-200 focus:border-green-500"
-                      />
-                      <Input
-                        placeholder="PIN Code"
-                        value={regPin}
-                        onChange={(e) => setRegPin(e.target.value)}
-                        className="h-12 border-2 border-green-200 focus:border-green-500"
-                      />
-                      <Input
-                        placeholder="City"
-                        value={regCity}
-                        onChange={(e) => setRegCity(e.target.value)}
-                        className="h-12 border-2 border-green-200 focus:border-green-500"
-                      />
-                      <Input
-                        placeholder="State"
-                        value={regState}
-                        onChange={(e) => setRegState(e.target.value)}
-                        className="h-12 border-2 border-green-200 focus:border-green-500"
-                      />
+                    <CardContent className="space-y-6 p-6">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          placeholder="City/State/Area/PIN Code"
+                          value={locQuery}
+                          onChange={(e) => setLocQuery(e.target.value)}
+                          className="pl-9 h-12 border-2 border-yellow-200 focus:border-yellow-500"
+                        />
+                      </div>
+                      <Button className="w-full h-12 text-lg bg-yellow-500 hover:bg-yellow-600 text-white">
+                        <MapPin className="h-5 w-5 mr-2" />
+                        Find Location
+                      </Button>
+                      <div className="space-y-3">
+                        {locResults.map((o, i) => (
+                          <div key={i} className="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded-r">
+                            <div className="flex items-center justify-between">
+                              <div className="font-semibold text-gray-800">{o.name}</div>
+                              <Badge className="bg-yellow-100 text-yellow-800">{o.pin}</Badge>
+                            </div>
+                            <div className="text-gray-700">{o.address}</div>
+                            <div className="text-gray-700">Phone: {o.phone}</div>
+                          </div>
+                        ))}
+                        {locQuery && locResults.length === 0 && (
+                          <div className="flex items-center gap-2 text-yellow-800 bg-yellow-50 border border-yellow-200 p-3 rounded">
+                            <AlertCircle className="h-5 w-5" />
+                            <span>No results. Try a different query.</span>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab 4: Find Pincode */}
+                <TabsContent value="pincode">
+                  <Card className="shadow-xl border-0 bg-white overflow-hidden">
+                    <div className="bg-orange-500 text-white p-6">
+                      <div className="flex items-center gap-3">
+                        <Search className="h-6 w-6" />
+                        <div>
+                          <h3 className="text-2xl font-bold">Find Pincode</h3>
+                          <p className="text-white/90">Search PIN codes by city or area name</p>
+                        </div>
+                      </div>
                     </div>
-                    <Input
-                      placeholder="Address"
-                      value={regAddress}
-                      onChange={(e) => setRegAddress(e.target.value)}
-                      className="h-24 border-2 border-green-200 focus:border-green-500"
-                    />
-                    <div className="flex items-center gap-2">
-                      <Checkbox id="terms" checked={regAgree} onCheckedChange={(v) => setRegAgree(!!v)} />
-                      <label htmlFor="terms" className="text-sm">
-                        I agree to the Terms & Conditions
-                      </label>
+                    <CardContent className="space-y-6 p-6">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          placeholder="Enter City/Area name"
+                          value={pinQuery}
+                          onChange={(e) => setPinQuery(e.target.value)}
+                          className="pl-9 h-12 border-2 border-orange-200 focus:border-orange-500"
+                        />
+                      </div>
+                      <Button className="w-full h-12 text-lg bg-orange-500 hover:bg-orange-600 text-white">
+                        <Search className="h-5 w-5 mr-2" />
+                        Search
+                      </Button>
+                      <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {pinResults.map((p) => (
+                          <div
+                            key={p}
+                            className="flex items-center justify-between bg-orange-50 border border-orange-200 p-3 rounded"
+                          >
+                            <span className="font-medium text-orange-800">{p}</span>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-orange-300 text-orange-700 bg-transparent"
+                              onClick={() => copyPin(p)}
+                            >
+                              Copy
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      {pinQuery && pinResults.length === 0 && (
+                        <div className="flex items-center gap-2 text-orange-800 bg-orange-50 border border-orange-200 p-3 rounded">
+                          <AlertCircle className="h-5 w-5" />
+                          <span>No PIN codes found. Try another area.</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Tab 5: Customer Registration */}
+                <TabsContent value="register">
+                  <Card className="shadow-xl border-0 bg-white overflow-hidden">
+                    <div className="bg-green-600 text-white p-6">
+                      <div className="flex items-center gap-3">
+                        <UserPlus className="h-6 w-6" />
+                        <div>
+                          <h3 className="text-2xl font-bold">Customer Registration</h3>
+                          <p className="text-green-100">Register as a customer for faster service</p>
+                        </div>
+                      </div>
                     </div>
-                    <Button onClick={submitRegister} className="w-full h-12 text-lg bg-green-600 hover:bg-green-700">
-                      <UserPlus className="h-5 w-5 mr-2" />
-                      Register
-                    </Button>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                    <CardContent className="space-y-6 p-6">
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <Input
+                          placeholder="Full Name"
+                          value={regName}
+                          onChange={(e) => setRegName(e.target.value)}
+                          className="h-12 border-2 border-green-200 focus:border-green-500"
+                        />
+                        <Input
+                          type="email"
+                          placeholder="Email"
+                          value={regEmail}
+                          onChange={(e) => setRegEmail(e.target.value)}
+                          className="h-12 border-2 border-green-200 focus:border-green-500"
+                        />
+                        <Input
+                          placeholder="Mobile Number"
+                          value={regMobile}
+                          onChange={(e) => setRegMobile(e.target.value)}
+                          className="h-12 border-2 border-green-200 focus:border-green-500"
+                        />
+                        <Input
+                          placeholder="PIN Code"
+                          value={regPin}
+                          onChange={(e) => setRegPin(e.target.value)}
+                          className="h-12 border-2 border-green-200 focus:border-green-500"
+                        />
+                        <Input
+                          placeholder="City"
+                          value={regCity}
+                          onChange={(e) => setRegCity(e.target.value)}
+                          className="h-12 border-2 border-green-200 focus:border-green-500"
+                        />
+                        <Input
+                          placeholder="State"
+                          value={regState}
+                          onChange={(e) => setRegState(e.target.value)}
+                          className="h-12 border-2 border-green-200 focus:border-green-500"
+                        />
+                      </div>
+                      <Input
+                        placeholder="Address"
+                        value={regAddress}
+                        onChange={(e) => setRegAddress(e.target.value)}
+                        className="h-24 border-2 border-green-200 focus:border-green-500"
+                      />
+                      <div className="flex items-center gap-2">
+                        <Checkbox id="terms" checked={regAgree} onCheckedChange={(v) => setRegAgree(!!v)} />
+                        <label htmlFor="terms" className="text-sm">
+                          I agree to the Terms & Conditions
+                        </label>
+                      </div>
+                      <Button onClick={submitRegister} className="w-full h-12 text-lg bg-green-600 hover:bg-green-700">
+                        <UserPlus className="h-5 w-5 mr-2" />
+                        Register
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
           </div>
         </section>
 
@@ -2588,7 +2690,7 @@ export default function IndiaPostHomepage() {
                           }`}
                           onClick={() => go(item.page)}
                         >
-                          <item.icon className={`h-4 w-4 mr-3 ${item.color}`} />
+                          {<item.icon className={`h-4 w-4 mr-3 ${item.color}`} />}
                           <span>{item.label}</span>
                         </Button>
                       ))}
@@ -2623,7 +2725,7 @@ export default function IndiaPostHomepage() {
                     }`}
                     onClick={() => go(item.page)}
                   >
-                    <item.icon className={`h-4 w-4 mr-2 ${item.color}`} />
+                    {<item.icon className={`h-4 w-4 mr-2 ${item.color}`} />}
                     {item.label}
                   </Button>
                 ))}
